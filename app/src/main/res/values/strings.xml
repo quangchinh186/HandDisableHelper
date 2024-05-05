@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">HandDisableHelper</string>
+    <string name="accessibility_service_description">nothing</string>
+</resources>
