@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "HandDisableHelper"
 include(":app")
- 
+include(":openCV")
