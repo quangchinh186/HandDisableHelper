@@ -1,49 +1,44 @@
-package com.example.handdisablehelper;
+package com.example.handdisablehelper.Service;
 
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.PixelFormat;
-import android.media.ImageReader;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Surface;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import androidx.annotation.Nullable;
 
-import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.JavaCameraView;
-import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.video.BackgroundSubtractorMOG2;
-
-import java.util.Collections;
-import java.util.List;
+import com.example.handdisablehelper.R;
 
 public class FloatingViewService extends Service {
     public final int LEFT = 0, RIGHT = 1, UP = 2, DOWN = 3;
+    private boolean isRunning;
+    int SPEED = 10;
     //binding service
     private final IBinder mBinder = new LocalBinder();
+
     public class LocalBinder extends Binder {
-        FloatingViewService getService() {
+        public FloatingViewService getService() {
             // Return this instance of LocalService so clients can call public methods.
             return FloatingViewService.this;
         }
     }
+
     View mFloatingView;
     WindowManager windowManager;
     int LAYOUT_FLAG;
-
     WindowManager.LayoutParams layoutParams;
-
+    int display_width, display_height;
+    ProgressBar clickProgress;
 
     @Nullable
     @Override
@@ -51,20 +46,32 @@ public class FloatingViewService extends Service {
         return mBinder;
     }
 
+    void getDisplaySize(){
+        DisplayMetrics metrics = getApplicationContext().getResources().getDisplayMetrics();
+        display_height = metrics.heightPixels;
+        display_width = metrics.widthPixels;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        getDisplaySize();
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
             LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_PHONE;
         }
-
+        isRunning = true;
+        //floating view
         mFloatingView = LayoutInflater.from(this).inflate(R.layout.overlay_layout, null);
-
-        layoutParams = new WindowManager.LayoutParams(200, 400,
+        layoutParams = new WindowManager.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
                 LAYOUT_FLAG, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
-        layoutParams.gravity = Gravity.TOP|Gravity.RIGHT;
+        layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
         layoutParams.x = 0;
         layoutParams.y = 100;
 
@@ -72,40 +79,66 @@ public class FloatingViewService extends Service {
         windowManager.addView(mFloatingView, layoutParams);
         mFloatingView.setVisibility(View.VISIBLE);
 
+        clickProgress = mFloatingView.findViewById(R.id.clickProgress);
+
         return START_STICKY;
     }
 
     public void moveCursor(int direction){
+        Log.v("cursor", layoutParams.x + "/" + display_width + " " + layoutParams.y + "/" + display_height);
         switch (direction) {
             case LEFT:
                 Log.v("move", "left");
-                layoutParams.x = Math.max(layoutParams.x - 10, 0);
+                layoutParams.x = layoutParams.x - SPEED;
+                if(layoutParams.x < 0) layoutParams.x = 0;
                 break;
 
             case RIGHT:
                 Log.v("move", "right");
-                layoutParams.x = Math.min(layoutParams.x + 10, 2000);
+                layoutParams.x = layoutParams.x + SPEED;
+                if(layoutParams.x > display_width) layoutParams.x = display_width-5;
                 break;
 
             case UP:
                 Log.v("move", "up");
-                layoutParams.y = Math.max(layoutParams.y - 10, 0);
+                layoutParams.y = layoutParams.y - SPEED;
+                if(layoutParams.y < 0) layoutParams.y = 0;
                 break;
 
             case DOWN:
                 Log.v("move", "down");
-                layoutParams.y = Math.min(layoutParams.y + 10, 3000);
+                layoutParams.y = layoutParams.y + SPEED;
+                if(layoutParams.y > display_height) layoutParams.y = display_height-5;
                 break;
 
             default: break;
-
         }
         windowManager.updateViewLayout(mFloatingView, layoutParams);
+    }
+
+    public int[] getCursorPosition(){
+        int[] position = new int[2];
+        position[0] = layoutParams.x;
+        position[1] = layoutParams.y;
+
+        return position;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        isRunning = false;
         if(mFloatingView != null) windowManager.removeView(mFloatingView);
     }
+
+    public void updateProgress(int level){
+        clickProgress.setProgress(level);
+        windowManager.updateViewLayout(mFloatingView, layoutParams);
+    }
+
+    public boolean isRunning(){
+        return isRunning;
+    }
+
+
 }

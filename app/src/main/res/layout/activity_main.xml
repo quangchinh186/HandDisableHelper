@@ -4,56 +4,45 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".Activity.MainActivity">
 
-    <org.opencv.android.JavaCameraView
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp"
-        android:id="@+id/openCVCamera"
-        android:layout_width="300dp"
-        android:layout_height="500dp" />
-
-    <Button
-        android:layout_centerHorizontal="true"
+    <TextView
+        android:id="@+id/welcome"
+        android:textSize="20sp"
         android:layout_marginTop="20dp"
-        android:layout_below="@+id/openCVCamera"
-        android:id="@+id/startBtn"
-        android:text="start"
+        android:text="WELCOME"
+        android:layout_centerHorizontal="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
-    <LinearLayout
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/startBtn"
-        android:orientation="horizontal"
-        android:id="@+id/arrows"
+    <ImageView
+        android:layout_below="@+id/welcome"
+        android:id="@+id/reminder"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"/>
 
-        <Button
-            android:id="@+id/leftBtn"
-            android:text="left"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+    <Button
+        android:id="@+id/startService"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/reminder"
+        android:text="Start using Service"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 
-        <Button
-            android:id="@+id/rightBtn"
-            android:text="right"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+    <Button
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/startService"
+        android:id="@+id/tutorial_1"
+        android:text="Tutorial 1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 
-        <Button
-            android:id="@+id/upBtn"
-            android:text="up"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <Button
-            android:id="@+id/downBtn"
-            android:text="down"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-    </LinearLayout>
+    <Button
+        android:layout_centerHorizontal="true"
+        android:id="@+id/tutorial_2"
+        android:layout_below="@+id/tutorial_1"
+        android:text="Tutorial 2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 
 </RelativeLayout>
