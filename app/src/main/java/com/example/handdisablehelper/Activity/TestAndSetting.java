@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Button;
 
@@ -32,6 +34,10 @@ import java.util.Collections;
 import java.util.List;
 
 public class TestAndSetting extends CameraActivity {
+
+    int counter = 0, counterLimit = 50;
+    int range = 30;
+    boolean isMoving = false;
 
     FloatingViewService mService;
     boolean mBound = false;
@@ -102,52 +108,75 @@ public class TestAndSetting extends CameraActivity {
         Imgproc.cvtColor(rgba, rbg, Imgproc.COLOR_RGBA2RGB);
 
         int height = rbg.height();
-        int absoluteFaceSize = (int) (height*0.1);
+        int width = rbg.width();
+        int center_input_y = height/2;
+        int center_input_x = width/2;
+
 
         MatOfRect faces = new MatOfRect();
         if(cascadeClassifier != null){
-            cascadeClassifier.detectMultiScale(rbg, faces, 1.1, 2, 2,
-                    new Size(absoluteFaceSize, absoluteFaceSize), new Size());
+            cascadeClassifier.detectMultiScale(rbg, faces, 1.1, 3, 0,
+                    new Size(0,0), new Size());
         }
 
         Rect[] facesArray = faces.toArray();
         for (Rect r: facesArray) {
             Imgproc.rectangle(rgba, r.tl(), r.br(), new Scalar(0, 255, 0, 255), 2);
         }
+
         if(facesArray.length != 0){
-            //Log.e("faces arrays", facesArray[0].x + " " + facesArray[0].y);
-            if(facesArray[0].x < 80){
+            int center_x, center_y;
+            center_x = facesArray[0].x + (facesArray[0].width/2);
+            center_y = facesArray[0].y + (facesArray[0].height/2);
+            int leftBound = center_input_x + range,
+                    rightBound = center_input_x - range,
+                    topBound = center_input_y - range,
+                    downBound = center_input_y + range;
+
+            Log.v("face detected", "center at: " + center_x + "/" +center_y
+                    + " while bound is" + leftBound + " " + rightBound
+                    + " " + topBound + " " + downBound);
+
+            if(center_x > leftBound){
                 Log.v("faces", "left");
-                runOnUiThread(new Runnable() {
+                isMoving = true;
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
+                        if(mService == null) return;
                         mService.moveCursor(mService.LEFT);
                     }
                 });
             }
-            if(facesArray[0].x > 160){
+            if(center_x < rightBound){
                 Log.v("faces", "right");
-                runOnUiThread(new Runnable() {
+                isMoving = true;
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
+                        if(mService == null) return;
                         mService.moveCursor(mService.RIGHT);
                     }
                 });
             }
-            if(facesArray[0].y < 180){
+            if(center_y < topBound){
                 Log.v("faces", "up");
-                runOnUiThread(new Runnable() {
+                isMoving = true;
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
+                        if(mService == null) return;
                         mService.moveCursor(mService.UP);
                     }
                 });
             }
-            if(facesArray[0].y > 200){
+            if(center_y > downBound){
                 Log.v("faces", "down");
-                runOnUiThread(new Runnable() {
+                isMoving = true;
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
+                        if(mService == null) return;
                         mService.moveCursor(mService.DOWN);
                     }
                 });

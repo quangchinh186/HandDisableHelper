@@ -67,7 +67,8 @@ public class CameraPreviewService extends Service {
     //counter will increase after user NOT moving the cursor and will perform click
     //at 100
     //is moving check for user movement
-    int leftBound = 130, rightBound = 80, topBound = 55, downBound = 70, counter = 0, counterLimit = 50;
+    int counter = 0, counterLimit = 50;
+    int range = 30;
     boolean isMoving = false;
 
     //View element
@@ -196,11 +197,13 @@ public class CameraPreviewService extends Service {
     Mat CascadeRec(Mat rgba){
         Core.flip(rgba.t(), rgba, 1);
         Mat rbg = new Mat();
-        Log.v("face image", rgba.toString());
+
         Imgproc.cvtColor(rgba, rbg, Imgproc.COLOR_RGBA2RGB);
 
         int height = rbg.height();
-        int absoluteFaceSize = (int) (height*0.1);
+        int width = rbg.width();
+        int center_input_y = height/2;
+        int center_input_x = width/2;
 
         MatOfRect faces = new MatOfRect();
         if(cascadeClassifier != null){
@@ -211,10 +214,22 @@ public class CameraPreviewService extends Service {
         Rect[] facesArray = faces.toArray();
         for (Rect r: facesArray) {
             Imgproc.rectangle(rgba, r.tl(), r.br(), new Scalar(0, 255, 0, 255), 2);
+
         }
         if(facesArray.length != 0){
-            Log.e("faces arrays", facesArray[0].x + " " + facesArray[0].y);
-            if(facesArray[0].x > leftBound){
+            int center_x, center_y;
+            center_x = facesArray[0].x + (facesArray[0].width/2);
+            center_y = facesArray[0].y + (facesArray[0].height/2);
+            int leftBound = center_input_x + range,
+                    rightBound = center_input_x - range,
+                    topBound = center_input_y - range,
+                    downBound = center_input_y + range;
+
+            Log.v("face detected", "center at: " + center_x + "/" +center_y
+                    + " while bound is" + leftBound + " " + rightBound
+                    + " " + topBound + " " + downBound);
+
+            if(center_x > leftBound){
                 Log.v("faces", "left");
                 isMoving = true;
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -225,7 +240,7 @@ public class CameraPreviewService extends Service {
                     }
                 });
             }
-            if(facesArray[0].x < rightBound){
+            if(center_x < rightBound){
                 Log.v("faces", "right");
                 isMoving = true;
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -236,7 +251,7 @@ public class CameraPreviewService extends Service {
                     }
                 });
             }
-            if(facesArray[0].y < topBound){
+            if(center_y < topBound){
                 Log.v("faces", "up");
                 isMoving = true;
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -247,7 +262,7 @@ public class CameraPreviewService extends Service {
                     }
                 });
             }
-            if(facesArray[0].y > downBound){
+            if(center_y > downBound){
                 Log.v("faces", "down");
                 isMoving = true;
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -268,7 +283,7 @@ public class CameraPreviewService extends Service {
     // Khởi tạo camera để preview trong textureview
     protected void createCameraPreview() {
         if(imageReader != null || cameraCaptureSessions != null) return;
-        imageReader = ImageReader.newInstance(imageDimension.getWidth(), imageDimension.getHeight(), ImageFormat.YUV_420_888, 1);
+        imageReader = ImageReader.newInstance(320, 320, ImageFormat.YUV_420_888, 1);
         imageReader.setOnImageAvailableListener(onImageAvailableListener, mBackgroundHandler);
         Log.v("camera", "create camera preview: Dimension " + imageDimension.toString());
         try {
@@ -361,7 +376,7 @@ public class CameraPreviewService extends Service {
             CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
             StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
             assert map != null;
-            imageDimension = new Size(240, 320);
+            imageDimension = new Size(320, 320);
             //imageDimension = map.getOutputSizes(SurfaceTexture.class)[0];
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 return;
@@ -462,6 +477,8 @@ public class CameraPreviewService extends Service {
         int width = image.getWidth();
         int height = image.getHeight();
         int offset = 0;
+
+        Log.v("image to mat","image size: " + width + " x " + height);
 
         Image.Plane[] planes = image.getPlanes();
         byte[] data = new byte[image.getWidth() * image.getHeight() * 3 /2];// ImageFormat.getBitsPerPixel(ImageFormat.YUV_420_888) / 8];
