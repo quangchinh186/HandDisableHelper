@@ -43,9 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         getCameraPermission();
         getOverlayPermission();
-        if(!Settings.canDrawOverlays(MainActivity.this)){
-            getOverlayPermission();
-        }
+
         hasAccessibilityPermission = checkAccessibilityPermission();
         start = findViewById(R.id.startService);
         tutorial_1 = findViewById(R.id.tutorial_1);

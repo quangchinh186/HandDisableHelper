@@ -34,6 +34,7 @@ import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
@@ -152,7 +153,7 @@ public class CameraPreviewService extends Service {
 
         //camera preview layout
         mFloatingView = LayoutInflater.from(this).inflate(R.layout.camera_preview, null);
-        layoutParams = new WindowManager.LayoutParams(200, 400,
+        layoutParams = new WindowManager.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
                 LAYOUT_FLAG, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
         layoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
@@ -195,6 +196,7 @@ public class CameraPreviewService extends Service {
     Mat CascadeRec(Mat rgba){
         Core.flip(rgba.t(), rgba, 1);
         Mat rbg = new Mat();
+        Log.v("face image", rgba.toString());
         Imgproc.cvtColor(rgba, rbg, Imgproc.COLOR_RGBA2RGB);
 
         int height = rbg.height();
@@ -202,13 +204,12 @@ public class CameraPreviewService extends Service {
 
         MatOfRect faces = new MatOfRect();
         if(cascadeClassifier != null){
-            cascadeClassifier.detectMultiScale(rbg, faces, 1.1, 2, 2,
-                    new org.opencv.core.Size(absoluteFaceSize, absoluteFaceSize), new org.opencv.core.Size());
+            cascadeClassifier.detectMultiScale(rbg, faces, 1.1, 3, 0,
+                    new org.opencv.core.Size(0, 0), new org.opencv.core.Size());
         }
 
         Rect[] facesArray = faces.toArray();
         for (Rect r: facesArray) {
-
             Imgproc.rectangle(rgba, r.tl(), r.br(), new Scalar(0, 255, 0, 255), 2);
         }
         if(facesArray.length != 0){
@@ -267,8 +268,9 @@ public class CameraPreviewService extends Service {
     // Khởi tạo camera để preview trong textureview
     protected void createCameraPreview() {
         if(imageReader != null || cameraCaptureSessions != null) return;
-        imageReader = ImageReader.newInstance(imageDimension.getWidth(), imageDimension.getHeight(), ImageFormat.YUV_420_888, 2);
+        imageReader = ImageReader.newInstance(imageDimension.getWidth(), imageDimension.getHeight(), ImageFormat.YUV_420_888, 1);
         imageReader.setOnImageAvailableListener(onImageAvailableListener, mBackgroundHandler);
+        Log.v("camera", "create camera preview: Dimension " + imageDimension.toString());
         try {
             SurfaceTexture texture = textureView.getSurfaceTexture();
             assert texture != null;
@@ -359,7 +361,8 @@ public class CameraPreviewService extends Service {
             CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
             StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
             assert map != null;
-            imageDimension = map.getOutputSizes(SurfaceTexture.class)[0];
+            imageDimension = new Size(240, 320);
+            //imageDimension = map.getOutputSizes(SurfaceTexture.class)[0];
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
@@ -408,19 +411,18 @@ public class CameraPreviewService extends Service {
                 @Override
                 public void onImageAvailable(ImageReader reader) {
                     Log.v("image reader", "new image available");
-                    if (BuildConfig.DEBUG) Log.d(TAG,"onImageAvailable");
                     Image image;
                     try {
+                        isMoving = false;
                         image = reader.acquireLatestImage();
                         if(image == null) {
                             Log.d(TAG,"onImageAvailable: null image");
                             return;
                         }
-                        isMoving = false;
+                        //mat
                         Mat yuv= imageToMat(image);
                         CascadeRec(yuv);
                         Log.v("mat null?", yuv.toString());
-
                         if(!isMoving){
                             counter++;
                             if(counter % 10 == 0){
@@ -441,7 +443,7 @@ public class CameraPreviewService extends Service {
                             counter = 0;
                             //dispatch click;
                             int[] position = mService.getCursorPosition();
-                            AppAccessibilityService.instance.performClick(position[0], position[1]);
+                            AppAccessibilityService.instance.performClick(position[0]+20, position[1]);
                         }
 
                     } catch (IllegalStateException e) {

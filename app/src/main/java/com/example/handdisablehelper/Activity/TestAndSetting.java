@@ -79,7 +79,7 @@ public class TestAndSetting extends CameraActivity {
             @Override
             public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
                 Mat rgba = inputFrame.rgba();
-                Core.flip(rgba, rgba, 0);
+                Core.flip(rgba, rgba, 1);
                 rgba = CascadeRec(rgba);
                 return rgba;
             }
@@ -95,7 +95,9 @@ public class TestAndSetting extends CameraActivity {
     }
 
     Mat CascadeRec(Mat rgba){
+        Log.v("face image", rgba.toString());
         Core.flip(rgba.t(), rgba, 1);
+        Log.v("image flip","transpose and flip y");
         Mat rbg = new Mat();
         Imgproc.cvtColor(rgba, rbg, Imgproc.COLOR_RGBA2RGB);
 
@@ -110,7 +112,6 @@ public class TestAndSetting extends CameraActivity {
 
         Rect[] facesArray = faces.toArray();
         for (Rect r: facesArray) {
-
             Imgproc.rectangle(rgba, r.tl(), r.br(), new Scalar(0, 255, 0, 255), 2);
         }
         if(facesArray.length != 0){
@@ -155,6 +156,7 @@ public class TestAndSetting extends CameraActivity {
         }
 
         Core.flip(rgba.t(), rgba, 0);
+        Log.v("image flip","transpose and flip x");
 
         return rgba;
     }
