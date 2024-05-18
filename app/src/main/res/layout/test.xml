@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activity.Test">
+
+    <TextView
+        android:layout_marginTop="10dp"
+        android:text="Camera Preview"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <org.opencv.android.JavaCameraView
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        android:id="@+id/openCVCamera"
+        android:layout_width="400dp"
+        android:layout_height="500dp" />
+
+    <TextView
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/openCVCamera"
+        android:id="@+id/instruct_1"
+        android:textSize="20sp"
+        android:textColor="@color/green"
+        android:text="Green line is your face"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/instruct_1"
+        android:id="@+id/instruct_2"
+        android:textSize="20sp"
+        android:textColor="@color/red"
+        android:text="Red mark is the center or Nose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/instruct_2"
+        android:id="@+id/instruct_3"
+        android:textSize="20sp"
+        android:textColor="@color/blue"
+        android:text="Blue is the detect range"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:layout_below="@id/instruct_3"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/testBtn"
+        android:text="Try to click this button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/testBtn"
+        android:id="@+id/done"
+        android:text="Back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+
+</RelativeLayout>

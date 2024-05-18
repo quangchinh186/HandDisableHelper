@@ -7,6 +7,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
@@ -146,6 +147,10 @@ public class CameraPreviewService extends Service {
 
         OpenCVLoader.initDebug();
         initCascadeClassifier();
+
+        SharedPreferences sharedPreferences = getSharedPreferences("app setting", MODE_PRIVATE);
+        counterLimit = sharedPreferences.getInt("click timer", 50);
+        range = sharedPreferences.getInt("range", 30);
     }
 
     @Override
@@ -450,23 +455,29 @@ public class CameraPreviewService extends Service {
                                     @Override
                                     public void run() {
                                         if(mService == null) return;
-                                        mService.updateProgress(counter*2);
+                                        mService.updateProgress(counter/counterLimit);
                                     }
                                 });
                             }
                         } else {
                             counter = 0;
+                            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if(mService == null) return;
+                                    mService.updateProgress(0);
+                                }
+                            });
                         }
-                        Log.v("APP", "counter: " + counter);
 
-                        if(counter > counterLimit){
+
+                        if(counter == counterLimit){
                             counter = 0;
+                            int[] position = mService.getCursorPosition();
                             if(MODE.equals("tap")){
                                 //dispatch click;
-                                int[] position = mService.getCursorPosition();
                                 AppAccessibilityService.instance.performClick(position[0], position[1]);
                             } else {
-                                int[] position = mService.getCursorPosition();
                                 AppAccessibilityService.instance.performScroll(position);
                             }
                         }

@@ -80,10 +80,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Activity.TestAndSetting"
+            android:name=".Activity.Test"
             android:exported="false" />
         <activity
-            android:name=".Activity.Tutorial2"
+            android:name=".Activity.Setting"
             android:exported="false" />
     </application>
 

@@ -4,14 +4,17 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 
 import com.example.handdisablehelper.R;
+import com.example.handdisablehelper.Service.AppAccessibilityService;
 import com.example.handdisablehelper.Service.FloatingViewService;
 
 import org.opencv.android.CameraActivity;
@@ -20,6 +23,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -32,8 +36,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
-public class TestAndSetting extends CameraActivity {
+public class Test extends CameraActivity {
 
     int counter = 0, counterLimit = 50;
     int range = 30;
@@ -60,7 +65,7 @@ public class TestAndSetting extends CameraActivity {
     CameraBridgeViewBase cameraBridgeViewBase;
 
     private CascadeClassifier cascadeClassifier;
-
+    Button testBtn, backBtn;
 
     @Override
     protected void onStart() {
@@ -73,7 +78,25 @@ public class TestAndSetting extends CameraActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_test_and_setting);
+        setContentView(R.layout.test);
+
+        testBtn = findViewById(R.id.testBtn);
+        testBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Random random = new Random();
+                int color = Color.argb(255, random.nextInt(256), random.nextInt(256), random.nextInt(256));
+                testBtn.setBackgroundColor(color);
+            }
+        });
+        backBtn = findViewById(R.id.done);
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         cameraBridgeViewBase = findViewById(R.id.openCVCamera);
         cameraBridgeViewBase.setCameraIndex(CameraBridgeViewBase.CAMERA_ID_FRONT);
         cameraBridgeViewBase.setMaxFrameSize(640, 640);
@@ -85,8 +108,39 @@ public class TestAndSetting extends CameraActivity {
             @Override
             public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
                 Mat rgba = inputFrame.rgba();
+
                 Core.flip(rgba, rgba, 1);
                 rgba = CascadeRec(rgba);
+
+                if(isMoving){
+                    counter++;
+                    if(counter % 10 == 0){
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mService.updateProgress(counter/counterLimit);
+                            }
+                        });
+
+                    }
+                } else {
+                    counter = 0;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mService.updateProgress(0);
+                        }
+                    });
+
+                }
+
+                //perform click
+                if(counter == counterLimit){
+                    counter = 0;
+                    int[] position = mService.getCursorPosition();
+                    AppAccessibilityService.instance.performClick(position[0], position[1]);
+                }
+
                 return rgba;
             }
         });
@@ -101,6 +155,8 @@ public class TestAndSetting extends CameraActivity {
     }
 
     Mat CascadeRec(Mat rgba){
+        isMoving = false;
+
         Log.v("face image", rgba.toString());
         Core.flip(rgba.t(), rgba, 1);
         Log.v("image flip","transpose and flip y");
@@ -128,10 +184,14 @@ public class TestAndSetting extends CameraActivity {
             int center_x, center_y;
             center_x = facesArray[0].x + (facesArray[0].width/2);
             center_y = facesArray[0].y + (facesArray[0].height/2);
+            Imgproc.drawMarker(rgba, new Point(center_x, center_y), new Scalar(255, 0, 0));
             int leftBound = center_input_x + range,
                     rightBound = center_input_x - range,
                     topBound = center_input_y - range,
                     downBound = center_input_y + range;
+
+            Imgproc.rectangle(rgba, new Point(leftBound, topBound), new Point(rightBound, downBound),
+                    new Scalar(0, 143, 255), 2);
 
             Log.v("face detected", "center at: " + center_x + "/" +center_y
                     + " while bound is" + leftBound + " " + rightBound
@@ -144,7 +204,7 @@ public class TestAndSetting extends CameraActivity {
                     @Override
                     public void run() {
                         if(mService == null) return;
-                        mService.moveCursor(mService.LEFT);
+                        mService.moveCursor(mService.RIGHT);
                     }
                 });
             }
@@ -155,7 +215,7 @@ public class TestAndSetting extends CameraActivity {
                     @Override
                     public void run() {
                         if(mService == null) return;
-                        mService.moveCursor(mService.RIGHT);
+                        mService.moveCursor(mService.LEFT);
                     }
                 });
             }

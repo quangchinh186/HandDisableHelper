@@ -4,9 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
-import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -74,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
                 if(!hasAccessibilityPermission){
                     Toast.makeText(getApplicationContext(), "Please enable app's Accessibility in device setting", Toast.LENGTH_LONG).show();
                 } else {
-                    Intent intent = new Intent(getApplicationContext(), TestAndSetting.class);
+                    Intent intent = new Intent(getApplicationContext(), Test.class);
                     startActivity(intent);
                 }
             }
@@ -83,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         setting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), Tutorial2.class);
+                Intent intent = new Intent(getApplicationContext(), Setting.class);
                 startActivity(intent);
             }
         });
