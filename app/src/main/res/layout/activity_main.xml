@@ -15,16 +15,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
-    <ImageView
-        android:layout_below="@+id/welcome"
-        android:id="@+id/reminder"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
     <Button
         android:id="@+id/startService"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/reminder"
+        android:layout_below="@id/welcome"
         android:text="Start using Service"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
@@ -32,17 +26,35 @@
     <Button
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/startService"
-        android:id="@+id/tutorial_1"
-        android:text="Tutorial 1"
+        android:id="@+id/test"
+        android:text="TEST"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
     <Button
         android:layout_centerHorizontal="true"
-        android:id="@+id/tutorial_2"
-        android:layout_below="@+id/tutorial_1"
-        android:text="Tutorial 2"
+        android:id="@+id/setting"
+        android:layout_below="@+id/test"
+        android:text="SETTINGS"
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <ImageView
+        android:layout_marginTop="20dp"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/accessibility"
+        android:layout_below="@+id/setting"
+        android:id="@+id/reminder"
+        android:layout_width="300dp"
+        android:layout_height="400dp"/>
+
+    <TextView
+        android:textSize="20dp"
+        android:gravity="center"
+        android:layout_centerHorizontal="true"
+        android:text="Please enable App Accessibility Permission in Device Setting"
+        android:layout_below="@id/reminder"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"/>
 
 </RelativeLayout>

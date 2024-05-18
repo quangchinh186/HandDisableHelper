@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 
 import com.example.handdisablehelper.R;
 import com.example.handdisablehelper.Service.CameraPreviewService;
+import com.example.handdisablehelper.Service.FloatingMenuService;
 
 import org.opencv.android.OpenCVLoader;
 
@@ -33,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     * The purpose of this activity is to check permission and give some options
     * */
 
-    Button start, tutorial_1, tutorial_2;
+    Button start, test, setting;
     boolean hasAccessibilityPermission;
 
     @Override
@@ -46,8 +48,8 @@ public class MainActivity extends AppCompatActivity {
 
         hasAccessibilityPermission = checkAccessibilityPermission();
         start = findViewById(R.id.startService);
-        tutorial_1 = findViewById(R.id.tutorial_1);
-        tutorial_2 = findViewById(R.id.tutorial_2);
+        test = findViewById(R.id.test);
+        setting = findViewById(R.id.setting);
 
         OpenCVLoader.initDebug();
 
@@ -58,13 +60,15 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Please enable app's Accessibility in device setting", Toast.LENGTH_LONG).show();
                 } else {
                     Intent intent = new Intent(getApplicationContext(), CameraPreviewService.class);
+                    Intent menu = new Intent(getApplicationContext(), FloatingMenuService.class);
                     startService(intent);
+                    startService(menu);
                     finish();
                 }
             }
         });
 
-        tutorial_1.setOnClickListener(new View.OnClickListener() {
+        test.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(!hasAccessibilityPermission){
@@ -76,15 +80,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        tutorial_2.setOnClickListener(new View.OnClickListener() {
+        setting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!hasAccessibilityPermission){
-                    Toast.makeText(getApplicationContext(), "Please enable app's Accessibility in device setting", Toast.LENGTH_LONG).show();
-                } else {
-                    Intent intent = new Intent(getApplicationContext(), Tutorial2.class);
-                    startActivity(intent);
-                }
+                Intent intent = new Intent(getApplicationContext(), Tutorial2.class);
+                startActivity(intent);
             }
         });
 

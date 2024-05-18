@@ -63,6 +63,8 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class CameraPreviewService extends Service {
+    public static CameraPreviewService instance = null;
+
     //bound int is the threshold to check for movement
     //counter will increase after user NOT moving the cursor and will perform click
     //at 100
@@ -70,7 +72,7 @@ public class CameraPreviewService extends Service {
     int counter = 0, counterLimit = 50;
     int range = 30;
     boolean isMoving = false;
-
+    String MODE = "tap";
     //View element
     View mFloatingView;
     WindowManager windowManager;
@@ -135,6 +137,8 @@ public class CameraPreviewService extends Service {
     public void onCreate() {
         super.onCreate();
         startBackgroundThread();
+
+        instance = this;
 
         Intent intent = new Intent(this, FloatingViewService.class);
         bindService(intent, connection, Context.BIND_IMPORTANT);
@@ -417,6 +421,7 @@ public class CameraPreviewService extends Service {
         if(mFloatingView != null) windowManager.removeView(mFloatingView);
         stopBackgroundThread();
         closeCamera();
+        instance = null;
         mService.onDestroy();
     }
 
@@ -456,9 +461,14 @@ public class CameraPreviewService extends Service {
 
                         if(counter > counterLimit){
                             counter = 0;
-                            //dispatch click;
-                            int[] position = mService.getCursorPosition();
-                            AppAccessibilityService.instance.performClick(position[0]+20, position[1]);
+                            if(MODE.equals("tap")){
+                                //dispatch click;
+                                int[] position = mService.getCursorPosition();
+                                AppAccessibilityService.instance.performClick(position[0], position[1]);
+                            } else {
+                                int[] position = mService.getCursorPosition();
+                                AppAccessibilityService.instance.performScroll(position);
+                            }
                         }
 
                     } catch (IllegalStateException e) {
@@ -526,6 +536,10 @@ public class CameraPreviewService extends Service {
         mat.put(0, 0, data);
 
         return mat;
+    }
+
+    public void setMode(String mode){
+        MODE = mode;
     }
 
 }

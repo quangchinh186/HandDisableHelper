@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import androidx.annotation.Nullable;
@@ -20,6 +21,7 @@ import androidx.annotation.Nullable;
 import com.example.handdisablehelper.R;
 
 public class FloatingViewService extends Service {
+    public static FloatingViewService instance = null;
     public final int LEFT = 0, RIGHT = 1, UP = 2, DOWN = 3;
     private boolean isRunning;
     int SPEED = 10;
@@ -39,6 +41,7 @@ public class FloatingViewService extends Service {
     WindowManager.LayoutParams layoutParams;
     int display_width, display_height;
     ProgressBar clickProgress;
+    ImageView cursor;
 
     @Nullable
     @Override
@@ -55,6 +58,7 @@ public class FloatingViewService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        instance = this;
         getDisplaySize();
     }
 
@@ -80,6 +84,7 @@ public class FloatingViewService extends Service {
         mFloatingView.setVisibility(View.VISIBLE);
 
         clickProgress = mFloatingView.findViewById(R.id.clickProgress);
+        cursor = mFloatingView.findViewById(R.id.mCursor);
 
         return START_STICKY;
     }
@@ -119,7 +124,7 @@ public class FloatingViewService extends Service {
     public int[] getCursorPosition(){
         int[] position = new int[2];
         position[0] = layoutParams.x;
-        position[1] = layoutParams.y;
+        position[1] = layoutParams.y+25;
 
         return position;
     }
@@ -127,7 +132,7 @@ public class FloatingViewService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        isRunning = false;
+        instance = null;
         if(mFloatingView != null) windowManager.removeView(mFloatingView);
     }
 
@@ -136,9 +141,12 @@ public class FloatingViewService extends Service {
         windowManager.updateViewLayout(mFloatingView, layoutParams);
     }
 
-    public boolean isRunning(){
-        return isRunning;
+    public void setMode(String mode){
+        if(mode.equals("tap")){
+            cursor.setImageResource(R.drawable.cursor);
+        } else {
+            cursor.setImageResource(R.drawable.scroll);
+        }
     }
-
 
 }
