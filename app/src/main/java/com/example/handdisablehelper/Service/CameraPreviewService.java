@@ -152,7 +152,7 @@ public class CameraPreviewService extends Service {
         initCascadeClassifier();
 
         SharedPreferences sharedPreferences = getSharedPreferences("app setting", MODE_PRIVATE);
-        counterLimit = sharedPreferences.getInt("click timer", 50);
+        counterLimit = sharedPreferences.getInt("timer", 50);
         range = sharedPreferences.getInt("range", 30);
     }
 
@@ -463,7 +463,7 @@ public class CameraPreviewService extends Service {
                                     @Override
                                     public void run() {
                                         if(mService == null) return;
-                                        mService.updateProgress( counterLimit/counter);
+                                        mService.updateProgress( counter);
                                     }
                                 });
                             }

@@ -24,7 +24,7 @@ public class FloatingViewService extends Service {
     public static FloatingViewService instance = null;
     public final int LEFT = 0, RIGHT = 1, UP = 2, DOWN = 3;
     private boolean isRunning;
-    int SPEED = 10;
+    int SPEED = 10, clickLimit = 50;
     //binding service
     private final IBinder mBinder = new LocalBinder();
 
@@ -60,6 +60,8 @@ public class FloatingViewService extends Service {
         super.onCreate();
         instance = this;
         getDisplaySize();
+        clickLimit = getSharedPreferences("app setting", MODE_PRIVATE).getInt("timer", 50);
+        SPEED = getSharedPreferences("app setting", MODE_PRIVATE).getInt("speed", 10);
     }
 
     @Override
@@ -85,6 +87,8 @@ public class FloatingViewService extends Service {
 
         clickProgress = mFloatingView.findViewById(R.id.clickProgress);
         cursor = mFloatingView.findViewById(R.id.mCursor);
+
+        clickProgress.setMax(clickLimit);
 
         return START_STICKY;
     }

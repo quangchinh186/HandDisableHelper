@@ -120,7 +120,7 @@ public class Test extends CameraActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                mService.updateProgress(counter/counterLimit);
+                                mService.updateProgress(counter);
                             }
                         });
 

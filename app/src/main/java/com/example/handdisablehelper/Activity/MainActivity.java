@@ -7,6 +7,7 @@ import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     * */
 
     Button start, test, setting;
+    int speed, timer, range;
     boolean hasAccessibilityPermission;
 
     @Override
@@ -92,6 +94,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         hasAccessibilityPermission = checkAccessibilityPermission();
+        speed = getSharedPreferences("app setting", MODE_PRIVATE).getInt("speed", 10);
+        timer = getSharedPreferences("app setting", MODE_PRIVATE).getInt("timer", 50);
+        range = getSharedPreferences("app setting", MODE_PRIVATE).getInt("range", 30);
+
+        Toast.makeText(this, "setting: speed-" + speed + " timer-" + timer + " range-" + range, Toast.LENGTH_LONG).show();
     }
 
     boolean checkAccessibilityPermission(){

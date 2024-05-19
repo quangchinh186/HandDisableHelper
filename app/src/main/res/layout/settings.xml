@@ -32,6 +32,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <com.google.android.material.slider.Slider
+            android:valueFrom="5"
+            android:valueTo="50"
             android:layout_below="@+id/text1"
             android:id="@+id/speedSlider"
             android:layout_width="wrap_content"
@@ -49,6 +51,8 @@
             android:layout_height="wrap_content"/>
 
         <com.google.android.material.slider.Slider
+            android:valueFrom="30"
+            android:valueTo="100"
             android:id="@+id/timerSlider"
             android:layout_below="@+id/text2"
             android:layout_marginLeft="20dp"
@@ -66,7 +70,9 @@
             android:layout_height="wrap_content"/>
 
         <com.google.android.material.slider.Slider
-            android:id="@+id/rangeSilder"
+            android:valueFrom="20"
+            android:valueTo="100"
+            android:id="@+id/rangeSlider"
             android:layout_below="@+id/text3"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
