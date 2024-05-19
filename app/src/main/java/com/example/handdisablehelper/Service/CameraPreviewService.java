@@ -23,6 +23,7 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -51,8 +52,10 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
@@ -204,10 +207,15 @@ public class CameraPreviewService extends Service {
 
     //face detect from openCV Mat
     Mat CascadeRec(Mat rgba){
-        Core.flip(rgba.t(), rgba, 1);
-        Mat rbg = new Mat();
+        Log.v("cascade input in start",rgba.toString());
+        //Imgcodecs.imwrite(Environment.getExternalStorageDirectory() + "/start.png", rgba.clone());
 
-        Imgproc.cvtColor(rgba, rbg, Imgproc.COLOR_RGBA2RGB);
+        Mat crop = rgba.submat(new Rect(new Point(0, 0), new Point(rgba.width(), rgba.height() - (rgba.height()/3))));
+        Core.flip(crop, crop, 1);
+        Core.flip(crop.t(), crop, 1);
+
+        Mat rbg = new Mat();
+        Imgproc.cvtColor(crop, rbg, Imgproc.COLOR_RGBA2RGB);
 
         int height = rbg.height();
         int width = rbg.width();
@@ -222,7 +230,7 @@ public class CameraPreviewService extends Service {
 
         Rect[] facesArray = faces.toArray();
         for (Rect r: facesArray) {
-            Imgproc.rectangle(rgba, r.tl(), r.br(), new Scalar(0, 255, 0, 255), 2);
+            Imgproc.rectangle(crop, r.tl(), r.br(), new Scalar(0, 255, 0, 255), 2);
 
         }
         if(facesArray.length != 0){
@@ -234,23 +242,12 @@ public class CameraPreviewService extends Service {
                     topBound = center_input_y - range,
                     downBound = center_input_y + range;
 
-            Log.v("face detected", "center at: " + center_x + "/" +center_y
+            Log.v("face detected in cascade", "center at: " + center_x + "/" +center_y
                     + " while bound is" + leftBound + " " + rightBound
                     + " " + topBound + " " + downBound);
 
             if(center_x > leftBound){
-                Log.v("faces", "left");
-                isMoving = true;
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(mService == null) return;
-                        mService.moveCursor(mService.LEFT);
-                    }
-                });
-            }
-            if(center_x < rightBound){
-                Log.v("faces", "right");
+                Log.v("FACE DIR", "left");
                 isMoving = true;
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
@@ -260,8 +257,19 @@ public class CameraPreviewService extends Service {
                     }
                 });
             }
+            if(center_x < rightBound){
+                Log.v("FACE DIR", "right");
+                isMoving = true;
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(mService == null) return;
+                        mService.moveCursor(mService.LEFT);
+                    }
+                });
+            }
             if(center_y < topBound){
-                Log.v("faces", "up");
+                Log.v("FACE DIR", "up");
                 isMoving = true;
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
@@ -272,7 +280,7 @@ public class CameraPreviewService extends Service {
                 });
             }
             if(center_y > downBound){
-                Log.v("faces", "down");
+                Log.v("FaCE DIR", "down");
                 isMoving = true;
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
@@ -284,15 +292,15 @@ public class CameraPreviewService extends Service {
             }
 
         }
-        Core.flip(rgba.t(), rgba, 0);
+        Core.flip(crop.t(), crop, 0);
 
-        return rgba;
+        return crop;
     }
 
     // Khởi tạo camera để preview trong textureview
     protected void createCameraPreview() {
         if(imageReader != null || cameraCaptureSessions != null) return;
-        imageReader = ImageReader.newInstance(320, 320, ImageFormat.YUV_420_888, 1);
+        imageReader = ImageReader.newInstance(500, 500, ImageFormat.YUV_420_888, 1);
         imageReader.setOnImageAvailableListener(onImageAvailableListener, mBackgroundHandler);
         Log.v("camera", "create camera preview: Dimension " + imageDimension.toString());
         try {
@@ -455,7 +463,7 @@ public class CameraPreviewService extends Service {
                                     @Override
                                     public void run() {
                                         if(mService == null) return;
-                                        mService.updateProgress(counter/counterLimit);
+                                        mService.updateProgress( counterLimit/counter);
                                     }
                                 });
                             }

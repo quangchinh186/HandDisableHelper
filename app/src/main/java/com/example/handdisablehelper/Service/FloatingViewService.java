@@ -77,7 +77,7 @@ public class FloatingViewService extends Service {
                 PixelFormat.TRANSLUCENT);
         layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
         layoutParams.x = 0;
-        layoutParams.y = 100;
+        layoutParams.y = 0;
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         windowManager.addView(mFloatingView, layoutParams);
@@ -124,7 +124,7 @@ public class FloatingViewService extends Service {
     public int[] getCursorPosition(){
         int[] position = new int[2];
         position[0] = layoutParams.x;
-        position[1] = layoutParams.y+25;
+        position[1] = layoutParams.y;
 
         return position;
     }

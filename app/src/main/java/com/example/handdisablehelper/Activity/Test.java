@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -27,6 +28,7 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
@@ -156,10 +158,10 @@ public class Test extends CameraActivity {
 
     Mat CascadeRec(Mat rgba){
         isMoving = false;
+        Log.v("cascade input in test",rgba.toString());
+        //Imgcodecs.imwrite(Environment.getExternalStorageDirectory() + "/test.png", rgba.clone());
 
-        Log.v("face image", rgba.toString());
         Core.flip(rgba.t(), rgba, 1);
-        Log.v("image flip","transpose and flip y");
         Mat rbg = new Mat();
         Imgproc.cvtColor(rgba, rbg, Imgproc.COLOR_RGBA2RGB);
 
@@ -245,7 +247,6 @@ public class Test extends CameraActivity {
         }
 
         Core.flip(rgba.t(), rgba, 0);
-        Log.v("image flip","transpose and flip x");
 
         return rgba;
     }
